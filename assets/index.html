@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+  <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>Cryptocompare</title>
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+
+      <v-toolbar dark color="cyan accent-4">
+        <v-toolbar-side-icon></v-toolbar-side-icon>
+        <v-toolbar-title class="white--text">BTC - USD</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon>
+          <v-icon>search</v-icon>
+        </v-btn>
+        <v-btn icon>
+          <v-icon>more_vert</v-icon>
+        </v-btn>
+      </v-toolbar>
+      <v-flex xs12>
+        <div id="contenedor" style=" height: 400px; margin: 0 auto"></div>
+      </v-flex>
+
+      <v-footer class="pa-3" fixed color="cyan accent-4">
+        <v-spacer></v-spacer>
+        <div>© {{ new Date().getFullYear() }}</div>
+      </v-footer>
+
+    </v-app>
+
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.3/vue.min.js"></script>
+  <script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+  <script>
+    Highcharts.setOptions({
+      global: {
+        useUTC: false
+      }
+    });
+
+    var vm = new Vue({
+      el: '#app',
+      data: {
+        msj: 'mensaje',
+        lista: []
+      },
+      mounted: function () {
+        this.searchSong();
+      },
+      methods: {
+        searchSong: function () {
+          var urlServer = 'http://localhost:1337/moneda'
+          var _this = this;
+          var confiAxios = {
+            url: urlServer,
+            method: 'get',
+            responseType: 'json',
+            data: {},
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          };
+          var rowDatos = []
+          axios.request(confiAxios)
+            .then(function (response) {
+              _this.lista = response.data
+
+              Highcharts.chart('contenedor', {
+                chart: {
+                  zoomType: 'x'
+                },
+                title: {
+                  text: 'BTC - USD  '
+                },
+                subtitle: {
+                  text: document.ontouchstart === undefined ?
+                    'Haga clic y arrastre en el área de trazado para acercar' : 'Click en el gráfico para acercar'
+                },
+                xAxis: {
+                  type: 'datetime'
+                },
+                yAxis: {
+                  title: {
+                    text: 'Tipo de Cambio'
+                  }
+                },
+                legend: {
+                  enabled: false
+                },
+                plotOptions: {
+                  area: {
+                    fillColor: {
+                      linearGradient: {
+                        x1: 0,
+                        y1: 0,
+                        x2: 0,
+                        y2: 1
+                      },
+                      stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                      ]
+                    },
+                    marker: {
+                      radius: 2
+                    },
+                    lineWidth: 1,
+                    states: {
+                      hover: {
+                        lineWidth: 1
+                      }
+                    },
+                    threshold: null
+                  }
+                },
+                series: [{
+                  type: 'area',
+                  name: 'BTC to USD',
+                  data: response.data
+                }]
+              });
+            });
+        },
+      }
+    })
+  </script>
+
+</body>
+
+</html>
